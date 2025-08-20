@@ -1,0 +1,12 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+keyed_groups:
+  - key: tags.Role
+    prefix: role_
+hostnames:
+  - private-ip-address
+filters:
+  tag:Role: "app"
+compose:
+  ansible_host: private_ip_address

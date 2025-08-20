@@ -1,0 +1,12 @@
+- name: Ensure base packages
+  package:
+    name:
+      - python3-pip
+      - amazon-cloudwatch-agent
+    state: present
+
+- name: Enable & start cloudwatch agent
+  systemd:
+    name: amazon-cloudwatch-agent
+    enabled: yes
+    state: started

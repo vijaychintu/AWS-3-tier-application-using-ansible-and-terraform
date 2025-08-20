@@ -1,0 +1,42 @@
+- name: Create app user
+  user: { name: "{{ app_user }}", system: yes, create_home: no }
+
+- name: Create app dir
+  file: { path: "{{ app_dir }}", state: directory, owner: "{{ app_user }}", group: "{{ app_user }}" }
+
+- name: Sync app files
+  copy:
+    src: "{{ playbook_dir }}/../../files/app/"
+    dest: "{{ app_dir }}/"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"
+
+- name: Install deps
+  pip:
+    requirements: "{{ app_dir }}/requirements.txt"
+    executable: pip3
+
+- name: Systemd service
+  copy:
+    dest: /etc/systemd/system/{{ app_service }}.service
+    content: |
+      [Unit]
+      Description=Demo Flask App
+      After=network.target
+
+      [Service]
+      User={{ app_user }}
+      WorkingDirectory={{ app_dir }}
+      ExecStart=/usr/bin/env gunicorn -w 2 -b 127.0.0.1:{{ app_port }} app:app
+      Environment=APP_DB_URI={{ app_db_uri }}
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable & restart app
+  systemd:
+    name: "{{ app_service }}"
+    enabled: yes
+    state: restarted

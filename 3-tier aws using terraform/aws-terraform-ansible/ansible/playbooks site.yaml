@@ -1,0 +1,17 @@
+- name: Configure app servers
+  hosts: role_app
+  gather_facts: yes
+  become: yes
+
+  vars:
+    app_dir: /opt/demoapp
+    app_user: web
+    app_service: demoapp
+    listen_port: 80
+    app_port: 8000
+    app_db_uri: ""   # set via --extra-vars if using RDS
+
+  roles:
+    - role: common
+    - role: web
+    - role: app
